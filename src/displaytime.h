@@ -13,6 +13,8 @@ LedControl lc=LedControl(14,13,12,1);
 const int matrixHeight = 8;
 const int matrixWidth = 8;
 
+unsigned long delaytime=100;
+
 void LedSetup() {
   /*
    The MAX72XX is in power-saving mode on startup,
@@ -26,26 +28,34 @@ void LedSetup() {
 
 }
 
-void displayTime(int seconds) {
+void displayTime(int seconds,int blinkdelay) {
+    lc.clearDisplay(0);
     int minutes = seconds / 60;
+    Serial.print("Minutes: ");
+    Serial.print(minutes);
+    Serial.println();
     int eigths = (seconds % 60)/8;
-    for (int row = 0; row<matrixHeight; row++) {
-        if (minutes != 0) {
-            for (int col = 0; col < matrixWidth; col++) {
-                lc.setLed(0,row,col,true);
+    int blink = 0;
+    Serial.print("Eigths: ");
+    Serial.print(eigths);
+    Serial.println();
+        while (minutes) {
+            for (int row = 0; row < matrixHeight; row++) {
+                lc.setLed(0,row,minutes,true);
             }
             minutes--;
-            }
-        if (minutes = 0) {
-            for (eigths; eigths > 0; eigths--) {
-                lc.setLed(0,row,eigths,true);
-                }
-            }
-        }
-
-
+          }
+      blink = eigths;
+      while (eigths >= 0) {
+        lc.setLed(0,eigths,0,true);
+        eigths--;
+      }
+      delay(blinkdelay);
+      lc.setLed(0,blink,0,false);
 }
-        
-            
-        
-    
+
+void lightAll () {
+  for (int row = 0; row < matrixHeight; row++) {
+    lc.setRow(0,row,B11111111);
+  }
+}
