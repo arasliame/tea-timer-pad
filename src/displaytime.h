@@ -28,7 +28,8 @@ void LedSetup() {
 
 }
 
-void displayTime(int seconds,int blinkdelay) {
+/*
+void displayTime2(int seconds,int blinkdelay) {
     lc.clearDisplay(0);
     int minutes = seconds / 60;
     Serial.print("Minutes: ");
@@ -52,6 +53,29 @@ void displayTime(int seconds,int blinkdelay) {
       }
       delay(blinkdelay);
       lc.setLed(0,blink,0,false);
+}
+*/
+
+void displayTime(int seconds) {
+    lc.clearDisplay(0);
+    int minutes = seconds / 60;
+    Serial.print("Minutes: ");
+    Serial.print(minutes);
+    Serial.println();
+    int eigths = (seconds % 60)/8;
+    Serial.print("Eigths: ");
+    Serial.print(eigths);
+    Serial.println();
+        while (minutes) {
+            for (int row = 0; row < matrixHeight; row++) {
+                lc.setLed(0,row,minutes,true);
+            }
+            minutes--;
+          }
+      while (eigths>=0) {
+        lc.setLed(0,eigths,0,true);
+        eigths--;
+      }
 }
 
 void lightAll () {

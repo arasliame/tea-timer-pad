@@ -4,23 +4,22 @@
 
 const int padPin = 16;
 const int buzzPin = 4;
-const int duration = 200;
-const int pitch = 800;
-//3 seconds for testing
-const int timerLength = 10; //3 * 60 //minutes for easier entering
-
-int curPadState = 0;
-int prevPadState = 0;
+const int potPin = A0;
+const int duration = 200; //duration of buzz
+//10 seconds for testing //const int timerLength = 10; 
+int timeSetting;
 int prevObjState = 0;
 int prevObjState2 = 0;
 int timer = 0;
 int objectOn = 0;
-
-const int pressureThreshold = 500;
+int potValue;
+int prevPotValue;
+int prevTimeSetting;
+int prevTimeSetting2;
 
 void setup() {
-  // put your setup code here, to run once:
 pinMode(padPin,INPUT);
+pinMode(potPin,INPUT);
 Serial.begin(9600); 
 LedSetup();
 
@@ -28,30 +27,26 @@ LedSetup();
 
 void loop() {
 
-//prevPadState = curPadState;
-//curPadState = digitalRead(padPin);
+prevPotValue = potValue;
+potValue = analogRead(potPin);
 
-prevObjState2 = prevObjState; //additional variable 
-prevObjState = objectOn;
+Serial.print("Potentiometer: ");
+Serial.print(potValue);
+Serial.println();
+
+prevObjState2 = prevObjState; //state 2 seconds back
+prevObjState = objectOn; // state 1 second back
 objectOn = digitalRead(padPin);
 
-/*
-//analog code translate pressure #s to state
-if ((prevPadState - curPadState) < -pressureThreshold) //object has been placed
-  {
-    objectOn = 1;
-  }
-else if ((prevPadState - curPadState) > pressureThreshold) //object has been removed
-  {
-    objectOn = 0;
-    lc.clearDisplay(0);
-  }
-*/
+//warn when object is removed
+if (!objectOn && prevObjState && prevObjState2) {
+  tone(buzzPin, NOTE_F6, duration);
+}
 
 //start timer
 if (objectOn && !prevObjState && !prevObjState2) //2 consecutive seconds before resetting timer
   {
-    timer = timerLength + 1;
+    timer = timeSetting*30 + 1;
     tone(buzzPin,NOTE_B2,duration);
     lc.clearDisplay(0);
   }
@@ -60,17 +55,39 @@ if (objectOn && !prevObjState && !prevObjState2) //2 consecutive seconds before 
 if (objectOn && timer != 0)
   {
     timer--;
-    displayTime(timer,500);
+    displayTime(timer);
+    delay(500);
+    if (timer > (60/8)) {displayTime(timer-(60/8+1));} //make the last one blink
+    else {lc.clearDisplay(0);}
   }
 
 //end timer
 if (objectOn && (timer==0))
   {
     tone(buzzPin,NOTE_A5,duration); //enhancement - make it play a song :)
-    lightAll();
+    lightAll(); //blink display
     delay(500);
-    lc.clearDisplay(0); // change this to blink the display
+    lc.clearDisplay(0); // 
   }
+
+//only allow time selection display if there is nothing on the pressure pad
+//only display time selection if the potentiometer has been moved
+prevTimeSetting2 = prevTimeSetting;
+prevTimeSetting = timeSetting;
+
+if (!objectOn && abs(potValue - prevPotValue)>10 ) {
+  timeSetting = map(potValue, 0, 1023, 0, 16);
+  Serial.print("Timer Value Map: ");
+  Serial.print(timeSetting);
+  Serial.println();
+  lc.clearDisplay(0);
+  displayTime(timeSetting*30);
+}
+
+//turn off leds if setting has been the same for a while
+if (!objectOn && (timeSetting == prevTimeSetting2) && (timeSetting == prevTimeSetting)) 
+{lc.clearDisplay(0);}
+
 Serial.print("Timer: ");
 Serial.print(timer);
 Serial.println();
