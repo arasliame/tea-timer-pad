@@ -1,0 +1,27 @@
+NodeMCU
+
+Documenting how I have it wired up because I guarantee that I will forget
+
+From the NodeMCU:
+3v3 to breadboard +
+gnd to breabboard -
+D7 to LED Matrix CLK
+D6 to LED Matrix CS
+D5 to LED Matrix DIN
+D2 to passive buzzer
+D0 to pressure pad & 1K resistor into -
+A0 to potentiometer
+
+From the Potentiometer:
+Data to A0
+Other pins to + and -
+
+From the pressure pad:
+One side to D0 and 1K resistor into -
+One side to +
+
+From the LED Matrix:
+See NodeMCU, ground and power are normal
+
+From the buzzer:
+One pin to D2, other to ground
